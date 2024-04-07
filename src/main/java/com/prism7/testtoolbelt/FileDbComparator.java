@@ -4,9 +4,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * ファイルとDBの内容を比較する
+ */
 public class FileDbComparator {
 
     private static final String SEPARATOR = ";";
@@ -17,14 +21,22 @@ public class FileDbComparator {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int verifyExists(String csvFilePath) {
+    /**
+     * ファイルとDBを比較し、存在することを検証する
+     * @param filePath 比較を行うファイル
+     * @return ファイルと異なった件数
+     */
+    public int verifyExists(String filePath) {
         int notFoundCount = 0;
-        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             String currentTableName = null;
             List<String> fieldNames = null;
 
             while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
                 if (line.startsWith("[")) {
                     currentTableName = line.replaceAll("[\\[\\]]", "");
                 } else if (line.startsWith("{")) {
@@ -34,10 +46,10 @@ public class FileDbComparator {
                         continue;
                     }
                     if (!verifyRecordExists(currentTableName, fieldNames, line)) {
-                        System.out.println("×: " + line);
+                        System.out.printf("×: %s %s%n",currentTableName, line);
                         notFoundCount++;
                     } else {
-                        System.out.println("○: " + line);
+                        System.out.printf("○: %s %s%n",currentTableName, line);
                     }
                 }
             }
@@ -47,14 +59,22 @@ public class FileDbComparator {
         return notFoundCount;
     }
 
-    public int verifyNotExists(String csvFilePath) {
+    /**
+     * ファイルとDBを比較し、存在しないことを検証する
+     * @param filePath 比較を行うファイル
+     * @return ファイルと異なった件数
+     */
+    public int verifyNotExists(String filePath) {
         int foundCount = 0;
-        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
             String currentTableName = null;
             List<String> fieldNames = null;
 
             while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
                 if (line.startsWith("[")) {
                     currentTableName = line.replaceAll("[\\[\\]]", "");
                 } else if (line.startsWith("{")) {
@@ -64,10 +84,10 @@ public class FileDbComparator {
                         continue;
                     }
                     if (verifyRecordExists(currentTableName, fieldNames, line)) {
-                        System.out.println("×: " + line);
+                        System.out.printf("×: %s %s%n",currentTableName, line);
                         foundCount++;
                     } else {
-                        System.out.println("○: " + line);
+                        System.out.printf("○: %s %s%n",currentTableName, line);
                     }
                 }
             }
@@ -94,7 +114,7 @@ public class FileDbComparator {
                 whereConditions.add(fieldNames.get(i) + " = '" + data.get(i) + "'");
             }
         }
-        String sql = "SELECT * FROM " + tableName + " WHERE " + String.join(" AND ", whereConditions);
+        String sql = MessageFormat.format("SELECT * FROM {0} WHERE {1}", tableName, String.join(" AND ", whereConditions));
         List<?> result = jdbcTemplate.queryForList(sql);
         return !result.isEmpty();
     }

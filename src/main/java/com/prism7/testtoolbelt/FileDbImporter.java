@@ -8,11 +8,12 @@ import java.io.FileReader;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
-import static java.lang.System.Logger.Level.ERROR;
-
+/**
+ * ファイルをDBに取り込む
+ */
 public class FileDbImporter {
 
     private static final String SEPARATOR = ";";
@@ -23,8 +24,15 @@ public class FileDbImporter {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void loadAndImport(String csvFilePath) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
+    /**
+     * ファイルをDBに取り込む
+     *
+     * @param filePath 取り込むファイルへのパス
+     */
+    public void importFrom(String filePath) {
+        System.out.println("CSVファイルの読み込みとデータベースへの挿入を開始します。");
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
 
             String line;
             String currentTableName = null;
@@ -33,6 +41,9 @@ public class FileDbImporter {
 
             // CSVファイルを読み込み、データを準備
             while ((line = reader.readLine()) != null) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
                 if (line.startsWith("[")) {
                     if (currentTableName != null) {
                         performBulkInsert(currentTableName, fieldNames, dataLines);
@@ -71,8 +82,7 @@ public class FileDbImporter {
     // BulkInsertを実行するメソッド
     private void performBulkInsert(String tableName, List<String> fieldNames, List<List<String>> dataLines) {
         String insertSQL = generateInsertSQL(tableName, fieldNames);
-        System.out.println("実行するSQL: " + insertSQL); // SQL文を標準出力に出力
-        jdbcTemplate.batchUpdate(insertSQL, new BatchPreparedStatementSetter() {
+        int[] counts = jdbcTemplate.batchUpdate(insertSQL, new BatchPreparedStatementSetter() {
             @Override
             public void setValues(PreparedStatement preparedStatement, int i) throws SQLException {
                 List<String> data = dataLines.get(i);
@@ -86,6 +96,8 @@ public class FileDbImporter {
                 return dataLines.size();
             }
         });
+        int count = Arrays.stream(counts).reduce(0, Integer::sum);
+        System.out.printf("登録件数: %d 実行SQL: %s%n", count, insertSQL);
     }
 
     // INSERT文を生成するメソッド

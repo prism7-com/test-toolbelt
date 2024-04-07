@@ -18,6 +18,6 @@ class FileDbImporterTest {
     @Test
     void test() {
         FileDbImporter loader = new FileDbImporter(jdbcTemplate);
-        loader.loadAndImport(Paths.get("src/test/resources/data/sample.txt").toString());
+        loader.importFrom(Paths.get("src/test/resources/data/sample.txt").toString());
     }
 }
