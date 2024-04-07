@@ -7,13 +7,13 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CsvDbComparator {
+public class FileDbComparator {
 
     private static final String SEPARATOR = ";";
 
     private final JdbcTemplate jdbcTemplate;
 
-    public CsvDbComparator(JdbcTemplate jdbcTemplate) {
+    public FileDbComparator(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

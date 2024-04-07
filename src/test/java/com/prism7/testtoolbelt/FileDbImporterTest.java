@@ -10,14 +10,14 @@ import java.nio.file.Paths;
 
 @SpringBootTest
 @Transactional
-class CsvLoaderTest {
+class FileDbImporterTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
     void test() {
-        CsvLoader loader = new CsvLoader(jdbcTemplate);
-        loader.loadData(Paths.get("src/test/resources/data/sample.txt").toString());
+        FileDbImporter loader = new FileDbImporter(jdbcTemplate);
+        loader.loadAndImport(Paths.get("src/test/resources/data/sample.txt").toString());
     }
 }

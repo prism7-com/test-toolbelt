@@ -10,17 +10,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CsvLoader {
+public class FileDbImporter {
 
     private static final String SEPARATOR = ";";
 
     private final JdbcTemplate jdbcTemplate;
 
-    public CsvLoader(JdbcTemplate jdbcTemplate) {
+    public FileDbImporter(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void loadData(String csvFilePath) {
+    public void loadAndImport(String csvFilePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
 
             String line;
