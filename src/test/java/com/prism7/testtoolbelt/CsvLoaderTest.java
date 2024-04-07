@@ -6,15 +6,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.Paths;
+
 @SpringBootTest
 @Transactional
-class TestToolbeltApplicationTests {
+class CsvLoaderTest {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
-    void contextLoads() {
-        System.out.println("TEST");
+    void test() {
+        CsvLoader loader = new CsvLoader(jdbcTemplate);
+        loader.loadData(Paths.get("src/test/resources/data/sample.txt").toString());
     }
 }

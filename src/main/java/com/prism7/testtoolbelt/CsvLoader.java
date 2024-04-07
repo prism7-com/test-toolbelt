@@ -10,15 +10,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataLoader {
+public class CsvLoader {
+
+    private static final String SEPARATOR = ";";
 
     private final JdbcTemplate jdbcTemplate;
 
-    public DataLoader(JdbcTemplate jdbcTemplate) {
+    public CsvLoader(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void loadCSVData(String csvFilePath) {
+    public void loadData(String csvFilePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(csvFilePath))) {
 
             String line;
@@ -55,12 +57,12 @@ public class DataLoader {
 
     // フィールド名をパースするメソッド
     private List<String> parseFieldNames(String line) {
-        return List.of(line.replaceAll("[{}]", "").split(","));
+        return List.of(line.replaceAll("[{}]", "").split(SEPARATOR));
     }
 
     // データをパースするメソッド
     private List<String> parseData(String line) {
-        return List.of(line.split(","));
+        return List.of(line.split(SEPARATOR));
     }
 
     // BulkInsertを実行するメソッド
